@@ -86,7 +86,7 @@ MonoBehaviour:
   m_FallbackScreenDPI: 96
   m_DefaultSpriteDPI: 96
   m_DynamicPixelsPerUnit: 1
-  m_PresetInfoIsWorld: 1
+  m_PresetInfoIsWorld: 0
 --- !u!114 &4029080678774172390
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -122,7 +122,7 @@ MonoBehaviour:
   interactable: 1
   blocksRaycasts: 1
   forceUseBoxCollider: 0
-  angle: 360
+  angle: 180
   preserveAspect: 1
   vertAngle: 90
   ringFill: 0.5
@@ -512,12 +512,12 @@ PrefabInstance:
     - target: {fileID: 1859770900093104846, guid: 51cd887d35e34034ea871229a8bddbfc,
         type: 3}
       propertyPath: savedPos.x
-      value: 649.97644
+      value: 649.9968
       objectReference: {fileID: 0}
     - target: {fileID: 1859770900093104846, guid: 51cd887d35e34034ea871229a8bddbfc,
         type: 3}
       propertyPath: savedPos.y
-      value: -0.007520549
+      value: 0.000291951
       objectReference: {fileID: 0}
     - target: {fileID: 1859770900093104846, guid: 51cd887d35e34034ea871229a8bddbfc,
         type: 3}
@@ -692,12 +692,12 @@ PrefabInstance:
     - target: {fileID: 5169233371569873044, guid: cb80ec15c796f5c49a1982cf72e5a231,
         type: 3}
       propertyPath: savedPos.x
-      value: 1949.9845
+      value: 1949.9946
       objectReference: {fileID: 0}
     - target: {fileID: 5169233371569873044, guid: cb80ec15c796f5c49a1982cf72e5a231,
         type: 3}
       propertyPath: savedPos.y
-      value: -0.007520549
+      value: 0.000291951
       objectReference: {fileID: 0}
     - target: {fileID: 5169233371569873044, guid: cb80ec15c796f5c49a1982cf72e5a231,
         type: 3}
@@ -872,12 +872,12 @@ PrefabInstance:
     - target: {fileID: 1571075046698189164, guid: 80b9662efda9817458151b7dad8b704c,
         type: 3}
       propertyPath: savedPos.x
-      value: -649.9909
+      value: -650.0112
       objectReference: {fileID: 0}
     - target: {fileID: 1571075046698189164, guid: 80b9662efda9817458151b7dad8b704c,
         type: 3}
       propertyPath: savedPos.y
-      value: -0.007520549
+      value: 0.000291951
       objectReference: {fileID: 0}
     - target: {fileID: 1571075046698189164, guid: 80b9662efda9817458151b7dad8b704c,
         type: 3}
@@ -1162,12 +1162,12 @@ PrefabInstance:
     - target: {fileID: 7643136543346367376, guid: 25177978b83fbf04c9d8b05013fe0712,
         type: 3}
       propertyPath: savedPos.x
-      value: -1949.999
+      value: -1950.0092
       objectReference: {fileID: 0}
     - target: {fileID: 7643136543346367376, guid: 25177978b83fbf04c9d8b05013fe0712,
         type: 3}
       propertyPath: savedPos.y
-      value: -0.007520549
+      value: 0.000291951
       objectReference: {fileID: 0}
     - target: {fileID: 7643136543346367376, guid: 25177978b83fbf04c9d8b05013fe0712,
         type: 3}
