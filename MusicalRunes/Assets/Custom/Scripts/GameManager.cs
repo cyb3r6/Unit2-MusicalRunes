@@ -1,15 +1,26 @@
+using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
 using TMPro;
 
 public class GameManager : MonoBehaviour
 {
-    public int initialSequenceSize = 3;
-    public List<Rune> boardRunes;
+    [Header("Runes Settings")]
+    [SerializeField] private int initialSequenceSize = 3;
+    [SerializeField] private int initialBoardSize = 4;
+    [SerializeField] private RectTransform runesHolder;
+    [SerializeField] private List<Rune> availableRunePrefabs;
+    private List<Rune> boardRunes;
+    private List<Rune> instantiatedBoardRunes;
 
-    public int coinsPerRune = 1;
-    public TMP_Text coinsAmountText;
+    [Header("Coins Settings")]
+    [SerializeField] private int coinsPerRune = 1;
+    [SerializeField] private TMP_Text coinsAmountText;
+
+    [Header("Preview Settings")]
+    [SerializeField] private GameObject[] spinlights;
+    [SerializeField] private float delayBetweenRunePreview = .3f;
+    [SerializeField] private Announcer announcer;
 
     private double coinsAmount;
 
@@ -18,18 +29,24 @@ public class GameManager : MonoBehaviour
 
     public void OnRuneActivated(int index)
     {
-        // TODO: Prevent rune clicks when sequence finished.
-        if (currentPlayIndex >= currentRuneSequence.Count) return;
-
         if (currentRuneSequence[currentPlayIndex] == index)
             CorrectRuneSelected();
         else
-            FailedSequence();
+            StartCoroutine(FailedSequence());
     }
 
-    private void FailedSequence()
+    private IEnumerator FailedSequence()
     {
-        Debug.Log("FailedSequence");
+        SetRunesInteractivity(false);
+
+        announcer.ShowWrongRuneText();
+
+        yield return new WaitForSeconds(2);
+
+        Reset();
+        currentPlayIndex = 0;
+
+        yield return PlaySequencePreview(2);
     }
 
     private void CorrectRuneSelected()
@@ -43,29 +60,97 @@ public class GameManager : MonoBehaviour
 
     private void CompletedSequence()
     {
-        Debug.Log("CompletedSequence");
         currentRuneSequence.Add(Random.Range(0, boardRunes.Count));
         currentPlayIndex = 0;
-        PlaySequencePreview();
+
+        StartCoroutine(PlaySequencePreview());
     }
 
-    private void PlaySequencePreview()
+    private IEnumerator PlaySequencePreview(float startDelay = 1)
     {
-        // TODO: Animate each rune in turn
+        SetRunesInteractivity(false);
+        announcer.Clear();
 
-        string sequence = "Sequence: ";
-        foreach (var index in currentRuneSequence)
+        yield return new WaitForSeconds(1);
+
+        EnablePreviewFeedback();
+
+        yield return new WaitForSeconds(startDelay);
+
+        foreach (var runeIndex in currentRuneSequence)
         {
-            sequence += $"{index}, ";
+            yield return boardRunes[runeIndex].ActivateRune();
+            yield return new WaitForSeconds(delayBetweenRunePreview);
         }
-        Debug.Log(sequence);
+
+        DisablePreviewFeedback();
+        SetRunesInteractivity(true);
+    }
+
+    private void SetRunesInteractivity(bool interactable)
+    {
+        foreach (var rune in boardRunes)
+        {
+            if (interactable)
+                rune.EnableInteraction();
+            else
+                rune.DisableInteraction();
+        }
+    }
+
+    private void EnablePreviewFeedback()
+    {
+        foreach (var spinlight in spinlights)
+            spinlight.SetActive(true);
+
+        announcer.ShowPreviewText();
+    }
+
+    private void DisablePreviewFeedback()
+    {
+        foreach (var spinlight in spinlights)
+            spinlight.SetActive(false);
+
+        announcer.ShowSequenceInputText();
     }
 
     private void Awake()
     {
         SetCoins(0);
+        InitializeBoard();
         InitializeSequence();
-        PlaySequencePreview();
+        StartCoroutine(PlaySequencePreview(2));
+    }
+
+    private void Reset()
+    {
+        for (int i = runesHolder.childCount - 1; i >= 0; i--)
+            Destroy(runesHolder.GetChild(i).gameObject);
+
+        availableRunePrefabs.AddRange(instantiatedBoardRunes);
+
+        InitializeBoard();
+        InitializeSequence();
+    }
+
+    private void AddRandomRuneToBoard()
+    {
+        var runePrefab = availableRunePrefabs[Random.Range(0, availableRunePrefabs.Count)];
+        availableRunePrefabs.Remove(runePrefab);
+        instantiatedBoardRunes.Add(runePrefab);
+
+        var rune = Instantiate(runePrefab, runesHolder);
+        rune.Setup(boardRunes.Count, this);
+        boardRunes.Add(rune);
+    }
+
+    private void InitializeBoard()
+    {
+        boardRunes = new List<Rune>(initialBoardSize);
+        instantiatedBoardRunes = new List<Rune>();
+
+        for (int i = 0; i < initialBoardSize; i++)
+            AddRandomRuneToBoard();
     }
 
     private void InitializeSequence()

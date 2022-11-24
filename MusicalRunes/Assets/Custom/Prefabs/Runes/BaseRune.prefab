@@ -167,6 +167,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 92aa35bf4bae291418a4d4bfcf89a610, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  activationColor: {r: 0, g: 0, b: 0, a: 0}
+  audioSource: {fileID: 1508862027921346289}
+  button: {fileID: 5194025989607932901}
+  runeImage: {fileID: 251575855419921958}
+  activationTransitionDuration: 0.3
+  minActivationDuration: 0.5
 --- !u!1 &3482551313019070963
 GameObject:
   m_ObjectHideFlags: 0
@@ -226,7 +232,7 @@ AudioSource:
   Priority: 128
   DopplerLevel: 1
   MinDistance: 1
-  MaxDistance: 500
+  MaxDistance: 48.55
   Pan2D: 0
   rolloffMode: 0
   BypassEffects: 0
