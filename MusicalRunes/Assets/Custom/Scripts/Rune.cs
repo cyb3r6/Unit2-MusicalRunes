@@ -4,15 +4,25 @@ using UnityEngine.UI;
 
 public class Rune : MonoBehaviour
 {
+    private static readonly Color hintColor = new Color(1, 1, 1, .6f);
+
     [SerializeField] private Color activationColor;
     [SerializeField] private AudioSource audioSource;
     [SerializeField] private Button button;
     [SerializeField] private Image runeImage;
-    [SerializeField] private float activationTransitionDuration = 0.3f;
+    [SerializeField] private float colorTransitionDuration = 0.35f;
     [SerializeField] private float minActivationDuration = 0.5f;
+
+    public bool Interactable
+    {
+        get => button.interactable;
+        set => button.interactable = value;
+    }
 
     private int index;
     private GameManager gameManager;
+
+    private Coroutine animationCoroutine;
 
     public void Setup(int runeIndex, GameManager manager)
     {
@@ -23,31 +33,23 @@ public class Rune : MonoBehaviour
     public void OnClick()
     {
         gameManager.OnRuneActivated(index);
-        StartCoroutine(ActivateRune());
+        ActivateRune();
     }
 
-    public void DisableInteraction()
+    public Coroutine ActivateRune()
     {
-        button.interactable = false;
+        if (animationCoroutine != null) StopCoroutine(animationCoroutine);
+
+        animationCoroutine = StartCoroutine(ActivateRuneCoroutine());
+
+        return animationCoroutine;
     }
 
-    public void EnableInteraction()
-    {
-        button.interactable = true;
-    }
-
-    public IEnumerator ActivateRune()
+    private IEnumerator ActivateRuneCoroutine()
     {
         audioSource.Play();
-        float elapsedTime = 0;
-        float startTime = Time.time;
 
-        while (elapsedTime < activationTransitionDuration)
-        {
-            runeImage.color = Color.Lerp(Color.white, activationColor, elapsedTime / activationTransitionDuration);
-            elapsedTime = Time.time - startTime;
-            yield return null;
-        }
+        yield return LerpToColor(Color.white, activationColor);
 
         yield return new WaitForSeconds(minActivationDuration);
 
@@ -55,11 +57,29 @@ public class Rune : MonoBehaviour
         while (audioSource.isPlaying)
             yield return new WaitForSeconds(duration - audioSource.time);
 
-        elapsedTime = 0;
-        startTime = Time.time;
-        while (elapsedTime < activationTransitionDuration)
+        yield return LerpToColor(activationColor, Color.white);
+    }
+
+    public Coroutine SetHintVisual(bool state)
+    {
+        if (animationCoroutine != null) StopCoroutine(animationCoroutine);
+
+        if (state)
+            animationCoroutine = StartCoroutine(LerpToColor(Color.white, hintColor));
+        else
+            animationCoroutine = StartCoroutine(LerpToColor(hintColor, Color.white));
+
+        return animationCoroutine;
+    }
+
+    private IEnumerator LerpToColor(Color start, Color end)
+    {
+        float elapsedTime = 0;
+        float startTime = Time.time;
+
+        while (elapsedTime < colorTransitionDuration)
         {
-            runeImage.color = Color.Lerp(activationColor, Color.white, elapsedTime / activationTransitionDuration);
+            runeImage.color = Color.Lerp(start, end, elapsedTime / colorTransitionDuration);
             elapsedTime = Time.time - startTime;
             yield return null;
         }

@@ -14,9 +14,10 @@ public class GameManager : MonoBehaviour
     [Header("Runes Settings")]
     [SerializeField] private int initialSequenceSize = 3;
     [SerializeField] private int initialBoardSize = 4;
+    [SerializeField] private int increaseBoardSizeEveryXSequences = 5;
     [SerializeField] private RectTransform runesHolder;
     [SerializeField] private List<Rune> availableRunePrefabs;
-    private List<Rune> boardRunes;
+    public List<Rune> BoardRunes { get; private set; }
     private List<Rune> instantiatedBoardRunes;
 
     [Header("Coins Settings")]
@@ -27,10 +28,17 @@ public class GameManager : MonoBehaviour
     [SerializeField] private GameObject[] spinlights;
     [SerializeField] private float delayBetweenRunePreview = .3f;
 
+    [Header("Power Up Settings")]
+    [SerializeField] private List<Powerup> powerups;
+
     [Header("UI References")]
     [SerializeField] private Announcer announcer;
     [SerializeField] private TMP_Text coinsAmountText;
     [SerializeField] private TMP_Text highScoreText;
+
+    public Action<int> coinsChanged;
+    public Action sequenceCompleted;
+    public Action runeActivated;
 
     private int coinsAmount
     {
@@ -39,6 +47,8 @@ public class GameManager : MonoBehaviour
         {
             saveData.coinsAmount = value;
             coinsAmountText.text = coinsAmount.ToString();
+
+            coinsChanged?.Invoke(value);
         }
     }
 
@@ -52,10 +62,10 @@ public class GameManager : MonoBehaviour
 
             highScoreText.text = saveData.highScore.ToString();
         }
-
     }
 
     private List<int> currentRuneSequence;
+    public int CurrentRuneIndex => currentRuneSequence[currentPlayIndex];
     private int currentPlayIndex;
     private int currentRound;
 
@@ -63,15 +73,45 @@ public class GameManager : MonoBehaviour
 
     public void OnRuneActivated(int index)
     {
-        if (currentRuneSequence[currentPlayIndex] == index)
+        if (CurrentRuneIndex == index)
             CorrectRuneSelected();
         else
             StartCoroutine(FailedSequence());
     }
 
+    public void PurgeBoardRune(int removedIndex)
+    {
+        var rune = BoardRunes[removedIndex];
+
+        for (int i = BoardRunes.Count - 1; i > removedIndex; i--)
+        {
+            BoardRunes[i].Setup(i - 1, this);
+        }
+
+        for (int i = currentRuneSequence.Count - 1; i >= 0; i--)
+        {
+            var index = currentRuneSequence[i];
+            if (index == removedIndex) currentRuneSequence.RemoveAt(i);
+            else if (index > removedIndex) currentRuneSequence[i]--;
+        }
+
+        Destroy(runesHolder.GetChild(removedIndex).gameObject);
+
+        availableRunePrefabs.Add(instantiatedBoardRunes[removedIndex]);
+        instantiatedBoardRunes.RemoveAt(removedIndex);
+        BoardRunes.RemoveAt(removedIndex);
+    }
+
+    public Coroutine PlaySequencePreview(float startDelay = 1, bool resetPlayIndex = true)
+    {
+        if (resetPlayIndex) currentPlayIndex = 0;
+
+        return StartCoroutine(PlaySequencePreviewCoroutine(startDelay));
+    }
+
     private IEnumerator FailedSequence()
     {
-        SetRunesInteractivity(false);
+        SetPlayerInteractivity(false);
 
         announcer.ShowWrongRuneText();
 
@@ -86,7 +126,6 @@ public class GameManager : MonoBehaviour
         }
 
         Reset();
-        currentPlayIndex = 0;
         currentRound = 0;
 
         yield return PlaySequencePreview(2);
@@ -94,6 +133,7 @@ public class GameManager : MonoBehaviour
 
     private void CorrectRuneSelected()
     {
+        runeActivated?.Invoke();
         coinsAmount += coinsPerRune;
         currentPlayIndex++;
 
@@ -107,17 +147,21 @@ public class GameManager : MonoBehaviour
     {
         coinsAmount += coinsPerRound;
         currentRound++;
+
+        if (currentRound % increaseBoardSizeEveryXSequences == 0)
+            AddRandomRuneToBoard();
+
+        sequenceCompleted?.Invoke();
+
+        currentRuneSequence.Add(Random.Range(0, BoardRunes.Count));
+
         Save();
-
-        currentRuneSequence.Add(Random.Range(0, boardRunes.Count));
-        currentPlayIndex = 0;
-
-        StartCoroutine(PlaySequencePreview());
+        PlaySequencePreview();
     }
 
-    private IEnumerator PlaySequencePreview(float startDelay = 1)
+    private IEnumerator PlaySequencePreviewCoroutine(float startDelay = 1)
     {
-        SetRunesInteractivity(false);
+        SetPlayerInteractivity(false);
         announcer.Clear();
 
         yield return new WaitForSeconds(1);
@@ -128,23 +172,21 @@ public class GameManager : MonoBehaviour
 
         foreach (var runeIndex in currentRuneSequence)
         {
-            yield return boardRunes[runeIndex].ActivateRune();
+            yield return BoardRunes[runeIndex].ActivateRune();
             yield return new WaitForSeconds(delayBetweenRunePreview);
         }
 
         DisablePreviewFeedback();
-        SetRunesInteractivity(true);
+        SetPlayerInteractivity(true);
     }
 
-    private void SetRunesInteractivity(bool interactable)
+    public void SetPlayerInteractivity(bool interactable)
     {
-        foreach (var rune in boardRunes)
-        {
-            if (interactable)
-                rune.EnableInteraction();
-            else
-                rune.DisableInteraction();
-        }
+        foreach (var rune in BoardRunes)
+            rune.Interactable = interactable;
+
+        foreach (var powerup in powerups)
+            powerup.Interactable = interactable;
     }
 
     private void EnablePreviewFeedback()
@@ -177,7 +219,7 @@ public class GameManager : MonoBehaviour
         InitializeSequence();
         InitializeUI();
 
-        StartCoroutine(PlaySequencePreview(2));
+        PlaySequencePreview(2);
     }
 
     private void Reset()
@@ -198,13 +240,13 @@ public class GameManager : MonoBehaviour
         instantiatedBoardRunes.Add(runePrefab);
 
         var rune = Instantiate(runePrefab, runesHolder);
-        rune.Setup(boardRunes.Count, this);
-        boardRunes.Add(rune);
+        rune.Setup(BoardRunes.Count, this);
+        BoardRunes.Add(rune);
     }
 
     private void InitializeBoard()
     {
-        boardRunes = new List<Rune>(initialBoardSize);
+        BoardRunes = new List<Rune>(initialBoardSize);
         instantiatedBoardRunes = new List<Rune>();
 
         for (int i = 0; i < initialBoardSize; i++)
@@ -215,7 +257,7 @@ public class GameManager : MonoBehaviour
     {
         currentRuneSequence = new List<int>(initialSequenceSize);
         for (int i = 0; i < initialSequenceSize; i++)
-            currentRuneSequence.Add(Random.Range(0, boardRunes.Count));
+            currentRuneSequence.Add(Random.Range(0, BoardRunes.Count));
     }
 
     private void InitializeUI()
