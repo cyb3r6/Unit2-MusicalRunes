@@ -1,10 +1,16 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
+using Random = UnityEngine.Random;
 
 public class GameManager : MonoBehaviour
 {
+    private readonly string saveKey = "SaveKey";
+
+    public static GameManager Instance { get; private set; }
+
     [Header("Runes Settings")]
     [SerializeField] private int initialSequenceSize = 3;
     [SerializeField] private int initialBoardSize = 4;
@@ -15,17 +21,45 @@ public class GameManager : MonoBehaviour
 
     [Header("Coins Settings")]
     [SerializeField] private int coinsPerRune = 1;
-    [SerializeField] private TMP_Text coinsAmountText;
+    [SerializeField] private int coinsPerRound = 10;
 
     [Header("Preview Settings")]
     [SerializeField] private GameObject[] spinlights;
     [SerializeField] private float delayBetweenRunePreview = .3f;
-    [SerializeField] private Announcer announcer;
 
-    private double coinsAmount;
+    [Header("UI References")]
+    [SerializeField] private Announcer announcer;
+    [SerializeField] private TMP_Text coinsAmountText;
+    [SerializeField] private TMP_Text highScoreText;
+
+    private int coinsAmount
+    {
+        get => saveData.coinsAmount;
+        set
+        {
+            saveData.coinsAmount = value;
+            coinsAmountText.text = coinsAmount.ToString();
+        }
+    }
+
+    private int highScore
+    {
+        get => saveData.highScore;
+        set
+        {
+            saveData.highScore = value;
+            Save();
+
+            highScoreText.text = saveData.highScore.ToString();
+        }
+
+    }
 
     private List<int> currentRuneSequence;
     private int currentPlayIndex;
+    private int currentRound;
+
+    private SaveData saveData;
 
     public void OnRuneActivated(int index)
     {
@@ -43,23 +77,38 @@ public class GameManager : MonoBehaviour
 
         yield return new WaitForSeconds(2);
 
+        if (currentRound > highScore)
+        {
+            highScore = currentRound;
+            announcer.ShowHighScoreText(highScore);
+
+            yield return new WaitForSeconds(3);
+        }
+
         Reset();
         currentPlayIndex = 0;
+        currentRound = 0;
 
         yield return PlaySequencePreview(2);
     }
 
     private void CorrectRuneSelected()
     {
-        AddCoins(coinsPerRune);
+        coinsAmount += coinsPerRune;
         currentPlayIndex++;
 
         if (currentPlayIndex >= currentRuneSequence.Count)
             CompletedSequence();
+        else
+            Save();
     }
 
     private void CompletedSequence()
     {
+        coinsAmount += coinsPerRound;
+        currentRound++;
+        Save();
+
         currentRuneSequence.Add(Random.Range(0, boardRunes.Count));
         currentPlayIndex = 0;
 
@@ -116,9 +165,18 @@ public class GameManager : MonoBehaviour
 
     private void Awake()
     {
-        SetCoins(0);
+        if (Instance != null)
+        {
+            throw new Exception($"Multiple singleton instances! {Instance} :: {this}");
+        }
+        Instance = this;
+
+        LoadSaveData();
+
         InitializeBoard();
         InitializeSequence();
+        InitializeUI();
+
         StartCoroutine(PlaySequencePreview(2));
     }
 
@@ -160,14 +218,28 @@ public class GameManager : MonoBehaviour
             currentRuneSequence.Add(Random.Range(0, boardRunes.Count));
     }
 
-    private void AddCoins(double addedValue)
+    private void InitializeUI()
     {
-        SetCoins(coinsAmount + addedValue);
+        highScoreText.text = saveData.highScore.ToString();
+        coinsAmountText.text = coinsAmount.ToString();
     }
 
-    private void SetCoins(double newValue)
+    private void LoadSaveData()
     {
-        coinsAmount = newValue;
-        coinsAmountText.text = coinsAmount.ToString();
+        if (PlayerPrefs.HasKey(saveKey))
+        {
+            string serializedSaveData = PlayerPrefs.GetString(saveKey);
+            saveData = JsonUtility.FromJson<SaveData>(serializedSaveData);
+
+            return;
+        }
+
+        saveData = new SaveData();
+    }
+
+    private void Save()
+    {
+        string serializedSaveData = JsonUtility.ToJson(saveData);
+        PlayerPrefs.SetString(saveKey, serializedSaveData);
     }
 }

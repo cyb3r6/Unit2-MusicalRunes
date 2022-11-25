@@ -7,6 +7,7 @@ public class Announcer : MonoBehaviour
     [SerializeField] private string previewText = "Hey, Listen!";
     [SerializeField] private string sequenceInputText = "Show me what you got!";
     [SerializeField] private string wrongRuneText = "Oh no!!!";
+    [SerializeField] private string highScoreText = "New High Score: {0}";
 
     [SerializeField] private float bounceAmplitude = 0.01f;
     [SerializeField] private float bounceFrequency = 5;
@@ -31,6 +32,11 @@ public class Announcer : MonoBehaviour
     public void ShowWrongRuneText()
     {
         announcerText.text = wrongRuneText;
+    }
+
+    public void ShowHighScoreText(int highScore)
+    {
+        announcerText.text = String.Format(highScoreText, highScore);
     }
 
     private void Update()
