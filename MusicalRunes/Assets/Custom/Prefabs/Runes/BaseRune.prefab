@@ -148,7 +148,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4e62188adca544cf1b96ccf1630f15f9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  DoNotTesselate: 0
+  DoNotTesselate: 1
   savedPos: {x: 0, y: 0, z: 0}
   savedUp: {x: 0, y: 0, z: 0}
   savedRectSize: {x: 0, y: 0}
