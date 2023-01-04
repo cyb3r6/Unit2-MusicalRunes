@@ -156,6 +156,7 @@ public class GameManager : MonoBehaviour
         currentRuneSequence.Add(Random.Range(0, BoardRunes.Count));
 
         Save();
+        
         PlaySequencePreview();
     }
 
@@ -163,6 +164,9 @@ public class GameManager : MonoBehaviour
     {
         SetPlayerInteractivity(false);
         announcer.Clear();
+
+        announcer.gameObject.SetActive(false);
+        announcer.gameObject.SetActive(true);
 
         yield return new WaitForSeconds(1);
 
