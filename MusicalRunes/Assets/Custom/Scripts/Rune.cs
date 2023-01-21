@@ -19,20 +19,22 @@ public class Rune : MonoBehaviour
         set => button.interactable = value;
     }
 
-    private int index;
+    public int Index { get; private set; }
     private GameManager gameManager;
 
     private Coroutine animationCoroutine;
 
     public void Setup(int runeIndex, GameManager manager)
     {
-        index = runeIndex;
+        Index = runeIndex;
         gameManager = manager;
+
+        transform.SetSiblingIndex(Index);
     }
 
     public void OnClick()
     {
-        gameManager.OnRuneActivated(index);
+        gameManager.OnRuneActivated(Index);
         ActivateRune();
     }
 
@@ -83,5 +85,12 @@ public class Rune : MonoBehaviour
             elapsedTime = Time.time - startTime;
             yield return null;
         }
+    }
+
+    public void LerpToColor(Color end)
+    {
+        if (animationCoroutine != null) StopCoroutine(animationCoroutine);
+
+        animationCoroutine = StartCoroutine(LerpToColor(runeImage.color, end));
     }
 }

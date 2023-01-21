@@ -1,9 +1,11 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using MusicalRunes;
 using UnityEngine;
 using TMPro;
+using UnityEngine.UI;
 using Random = UnityEngine.Random;
 
 public class GameManager : MonoBehaviour
@@ -16,7 +18,9 @@ public class GameManager : MonoBehaviour
     [SerializeField] private int initialSequenceSize = 3;
     [SerializeField] private int initialBoardSize = 4;
     [SerializeField] private int increaseBoardSizeEveryXSequences = 5;
-    [SerializeField] private float maxTimeToChooseRune = 5;
+    [SerializeField] private int shuffleBoardEveryXSequences = 5;
+    [SerializeField] private float maxTimeToChooseRune = 7;
+    [SerializeField] private int maxLives = 3;
     [SerializeField] private RectTransform runesHolder;
     [SerializeField] private List<Rune> availableRunePrefabs;
     public List<Rune> BoardRunes { get; private set; }
@@ -25,6 +29,8 @@ public class GameManager : MonoBehaviour
     [Header("Coins Settings")]
     [SerializeField] private int coinsPerRune = 1;
     [SerializeField] private int coinsPerRound = 10;
+    [SerializeField] private int comboCoinsPerRune = 2;
+    [SerializeField] private float choseTimeForCombo = 1;
 
     [Header("Preview Settings")]
     [SerializeField] private GameObject[] spinlights;
@@ -32,12 +38,14 @@ public class GameManager : MonoBehaviour
 
     [Header("Power Up Settings")]
     [SerializeField] private List<Powerup> powerups;
+    [SerializeField] private List<Button> upgradeButtons;
 
     [Header("UI References")]
     [SerializeField] private Announcer announcer;
     [SerializeField] private TMP_Text coinsAmountText;
     [SerializeField] private TMP_Text highScoreText;
     [SerializeField] private TMP_Text timeText;
+    [SerializeField] private TMP_Text livesText;
 
     public Action<int> coinsChanged;
     public Action sequenceCompleted;
@@ -58,10 +66,10 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    public int HighScore
+    private int HighScore
     {
         get => saveData.highScore;
-        private set
+        set
         {
             saveData.highScore = value;
             Save();
@@ -70,12 +78,23 @@ public class GameManager : MonoBehaviour
         }
     }
 
+    private int remainingLives;
+    public int RemainingLives
+    {
+        get => remainingLives;
+        private set
+        {
+            remainingLives = value;
+            livesText.text = RemainingLives.ToString();
+        }
+    }
+
     private List<int> currentRuneSequence;
     public int CurrentRuneIndex => currentRuneSequence[currentPlayIndex];
     private int currentPlayIndex;
     private int currentRound;
     private float remainingRuneChooseTime;
-    private bool isRuneChoosingTime;
+    [NonSerialized] public bool isRuneChoosingTime;
 
     private SaveData saveData;
 
@@ -103,7 +122,7 @@ public class GameManager : MonoBehaviour
         if (CurrentRuneIndex == index)
             CorrectRuneSelected();
         else
-            StartCoroutine(FailedSequence());
+            FailedChoice();
     }
 
     public void PurgeBoardRune(int removedIndex)
@@ -132,20 +151,40 @@ public class GameManager : MonoBehaviour
     public Coroutine PlaySequencePreview(float startDelay = 1, bool resetPlayIndex = true)
     {
         isRuneChoosingTime = false;
+        remainingRuneChooseTime = maxTimeToChooseRune;
+
         if (resetPlayIndex) currentPlayIndex = 0;
 
         return StartCoroutine(PlaySequencePreviewCoroutine(startDelay));
     }
 
-    private IEnumerator FailedSequence(bool choseWrongRune = true)
+    private void FailedChoice(bool choseWrongRune = true)
     {
-        isRuneChoosingTime = false;
-        SetPlayerInteractivity(false);
+        RemainingLives--;
+
+        if (RemainingLives == 0)
+        {
+            StartCoroutine(FailedSequence(choseWrongRune));
+            return;
+        }
 
         if (choseWrongRune)
             announcer.ShowWrongRuneText();
         else
             announcer.ShowTimeoutText();
+
+        remainingRuneChooseTime = maxTimeToChooseRune;
+    }
+
+    private IEnumerator FailedSequence(bool choseWrongRune)
+    {
+        isRuneChoosingTime = false;
+        SetPlayerInteractivity(false);
+
+        if (choseWrongRune)
+            announcer.ShowFailedByRuneChoiceText();
+        else
+            announcer.ShowFailedByTimeoutText();
 
         yield return new WaitForSeconds(2);
 
@@ -159,30 +198,45 @@ public class GameManager : MonoBehaviour
 
         Reset();
         currentRound = 0;
+        RemainingLives = maxLives;
 
         yield return PlaySequencePreview(2);
     }
 
     private void CorrectRuneSelected()
     {
+        var combo = remainingRuneChooseTime > maxTimeToChooseRune - choseTimeForCombo && currentPlayIndex > 0;
+        CoinsAmount += combo ? comboCoinsPerRune : coinsPerRune;
+
         remainingRuneChooseTime = maxTimeToChooseRune;
         runeActivated?.Invoke();
-        CoinsAmount += coinsPerRune;
         currentPlayIndex++;
 
         if (currentPlayIndex >= currentRuneSequence.Count)
             CompletedSequence();
         else
+        {
+            announcer.ShowSequenceInputText();
             Save();
+        }
+    }
+
+    public void BloodSacrifice()
+    {
+        RemainingLives--;
+        CompletedSequence();
     }
 
     private void CompletedSequence()
     {
+        remainingRuneChooseTime = maxTimeToChooseRune;
         CoinsAmount += coinsPerRound;
         currentRound++;
 
         if (currentRound % increaseBoardSizeEveryXSequences == 0)
             AddRandomRuneToBoard();
+        if (currentRound % shuffleBoardEveryXSequences == 0)
+            ShuffleBoard();
 
         sequenceCompleted?.Invoke();
 
@@ -213,7 +267,22 @@ public class GameManager : MonoBehaviour
         SetPlayerInteractivity(true);
 
         isRuneChoosingTime = true;
-        remainingRuneChooseTime = maxTimeToChooseRune;
+    }
+
+    private void ShuffleBoard()
+    {
+        var newOrder = Enumerable.Range(0, BoardRunes.Count).OrderBy(_ => Random.value).ToList();
+
+        BoardRunes = BoardRunes.OrderBy(rune => newOrder.FindIndex(order => order == rune.Index)).ToList();
+
+        for (var sequenceIndex = 0; sequenceIndex < currentRuneSequence.Count; sequenceIndex++)
+        {
+            var runeIndex = currentRuneSequence[sequenceIndex];
+            currentRuneSequence[sequenceIndex] = newOrder.FindIndex(order => order == runeIndex);
+        }
+
+        for (var index = 0; index < BoardRunes.Count; index++)
+            BoardRunes[index].Setup(index, this);
     }
 
     public void SetPlayerInteractivity(bool interactable)
@@ -223,6 +292,10 @@ public class GameManager : MonoBehaviour
 
         foreach (var powerup in powerups)
             powerup.SetButtonInteractable(interactable);
+
+        foreach (var upgradeButton in upgradeButtons)
+            upgradeButton.interactable = interactable;
+
     }
 
     private void EnablePreviewFeedback()
@@ -250,7 +323,7 @@ public class GameManager : MonoBehaviour
         timeText.text = remainingRuneChooseTime.ToString("F1");
 
         if (Mathf.Approximately(remainingRuneChooseTime, 0))
-            StartCoroutine(FailedSequence(false));
+            FailedChoice(false);
     }
 
     private void Awake()
@@ -267,6 +340,7 @@ public class GameManager : MonoBehaviour
         InitializeSequence();
         InitializeUI();
 
+        RemainingLives = maxLives;
         PlaySequencePreview(2);
     }
 
@@ -310,7 +384,7 @@ public class GameManager : MonoBehaviour
 
     private void InitializeUI()
     {
-        highScoreText.text = saveData.highScore.ToString();
+        highScoreText.text = HighScore.ToString();
         coinsAmountText.text = CoinsAmount.ToString();
         timeText.text = maxTimeToChooseRune.ToString("F1");
     }

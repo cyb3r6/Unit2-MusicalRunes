@@ -1,52 +1,119 @@
 using System;
+using MusicalRunes;
 using TMPro;
 using UnityEngine;
 
-public class Announcer : MonoBehaviour
+public class Announcer : MonoBehaviour, ILocalizable
 {
-    [SerializeField] private string previewText = "Hey, Listen!";
-    [SerializeField] private string sequenceInputText = "Show me what you got!";
-    [SerializeField] private string wrongRuneText = "Oh no!!!";
-    [SerializeField] private string timeoutText = "Timeout!";
-    [SerializeField] private string highScoreText = "New High Score: {0}";
+    [SerializeField] private string previewTextId = "AnnouncerListen";
+    [SerializeField] private string sequenceInputTextId = "AnnouncerPlayerTurn";
+    [SerializeField] private string wrongRuneTextId = "AnnouncerFailedChoice";
+    [SerializeField] private string timeoutTextId = "AnnouncerTimeout";
+    [SerializeField] private string highScoreTextId = "AnnouncerHighScore";
+    [SerializeField] private string failedByTimeoutTextId = "AnnouncerFailedByTimeout";
+    [SerializeField] private string failedByRuneChoiceTextId = "AnnouncerFailedByRuneChoice";
+    [SerializeField] private string bloodSacrificeTextId = "AnnouncerBloodSacrifice";
 
     [SerializeField] private float bounceAmplitude = 0.01f;
     [SerializeField] private float bounceFrequency = 5;
 
     [SerializeField] private TMP_Text announcerText;
 
+    private string currentTextId;
+    private bool mustFormat;
+    private string formatParam;
+
     public void ShowPreviewText()
     {
-        announcerText.text = previewText;
+        currentTextId = previewTextId;
+        mustFormat = false;
+        UpdateText();
     }
 
     public void ShowSequenceInputText()
     {
-        announcerText.text = sequenceInputText;
+        currentTextId = sequenceInputTextId;
+        mustFormat = false;
+        UpdateText();
     }
 
     public void Clear()
     {
-        announcerText.text = String.Empty;
+        currentTextId = String.Empty;
+        mustFormat = false;
     }
 
     public void ShowWrongRuneText()
     {
-        announcerText.text = wrongRuneText;
+        currentTextId = wrongRuneTextId;
+        mustFormat = false;
+        UpdateText();
+    }
+
+    public void ShowFailedByRuneChoiceText()
+    {
+        currentTextId = failedByRuneChoiceTextId;
+        mustFormat = false;
+        UpdateText();
     }
 
     public void ShowTimeoutText()
     {
-        announcerText.text = timeoutText;
+        currentTextId = timeoutTextId;
+        mustFormat = false;
+        UpdateText();
+    }
+
+    public void ShowFailedByTimeoutText()
+    {
+        currentTextId = failedByTimeoutTextId;
+        mustFormat = false;
+        UpdateText();
     }
 
     public void ShowHighScoreText(int highScore)
     {
-        announcerText.text = String.Format(highScoreText, highScore);
+        currentTextId = highScoreTextId;
+        mustFormat = true;
+        formatParam = highScore.ToString();
+
+        UpdateText();
+    }
+
+    public void ShowBloodSacrificeText()
+    {
+        currentTextId = bloodSacrificeTextId;
+        mustFormat = false;
+        UpdateText();
+    }
+
+    private void UpdateText()
+    {
+        if (currentTextId == String.Empty)
+            announcerText.text = String.Empty;
+        else if (mustFormat)
+            announcerText.text = String.Format(Localization.GetLocalizedText(highScoreTextId), formatParam);
+        else
+            announcerText.text = Localization.GetLocalizedText(currentTextId);
+    }
+
+    public void LocaleChanged()
+    {
+        UpdateText();
     }
 
     private void Update()
     {
         transform.localScale = Vector3.one + Vector3.one * (Mathf.Sin(Time.time * bounceFrequency) * bounceAmplitude);
+    }
+
+    private void Awake()
+    {
+        Localization.RegisterWatcher(this);
+    }
+
+    private void OnDestroy()
+    {
+        Localization.DeregisterWatcher(this);
     }
 }
