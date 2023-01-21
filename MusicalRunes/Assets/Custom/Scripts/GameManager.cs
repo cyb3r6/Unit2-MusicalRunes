@@ -81,7 +81,7 @@ public class GameManager : MonoBehaviour
         {
             highScore = currentRound;
             announcer.ShowHighScoreText(highScore);
-
+            Save();
             yield return new WaitForSeconds(3);
         }
 
