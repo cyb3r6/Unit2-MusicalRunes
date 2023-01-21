@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using MusicalRunes;
 using UnityEngine;
 using TMPro;
 using Random = UnityEngine.Random;
@@ -15,6 +16,7 @@ public class GameManager : MonoBehaviour
     [SerializeField] private int initialSequenceSize = 3;
     [SerializeField] private int initialBoardSize = 4;
     [SerializeField] private int increaseBoardSizeEveryXSequences = 5;
+    [SerializeField] private float maxTimeToChooseRune = 5;
     [SerializeField] private RectTransform runesHolder;
     [SerializeField] private List<Rune> availableRunePrefabs;
     public List<Rune> BoardRunes { get; private set; }
@@ -35,27 +37,31 @@ public class GameManager : MonoBehaviour
     [SerializeField] private Announcer announcer;
     [SerializeField] private TMP_Text coinsAmountText;
     [SerializeField] private TMP_Text highScoreText;
+    [SerializeField] private TMP_Text timeText;
 
     public Action<int> coinsChanged;
     public Action sequenceCompleted;
     public Action runeActivated;
 
-    private int coinsAmount
+    public delegate void OnPowerupUpgradedDelegate(PowerupType upgradedPowerup, int newLevel);
+    public OnPowerupUpgradedDelegate powerupUpgraded;
+
+    public int CoinsAmount
     {
         get => saveData.coinsAmount;
-        set
+        private set
         {
             saveData.coinsAmount = value;
-            coinsAmountText.text = coinsAmount.ToString();
+            coinsAmountText.text = CoinsAmount.ToString();
 
             coinsChanged?.Invoke(value);
         }
     }
 
-    private int highScore
+    public int HighScore
     {
         get => saveData.highScore;
-        set
+        private set
         {
             saveData.highScore = value;
             Save();
@@ -68,8 +74,29 @@ public class GameManager : MonoBehaviour
     public int CurrentRuneIndex => currentRuneSequence[currentPlayIndex];
     private int currentPlayIndex;
     private int currentRound;
+    private float remainingRuneChooseTime;
+    private bool isRuneChoosingTime;
 
     private SaveData saveData;
+
+    public int GetPowerupLevel(PowerupType powerupType)
+    {
+        return saveData.GetUpgradableLevel(powerupType);
+    }
+
+    public void UpgradePowerup(PowerupType powerupType, int price)
+    {
+        if (price > CoinsAmount)
+            throw new Exception("Trying to buy upgrade with insufficient coins");
+
+        CoinsAmount -= price;
+
+        var newLevel = GetPowerupLevel(powerupType) + 1;
+        saveData.SetUpgradableLevel(powerupType, newLevel);
+        Save();
+
+        powerupUpgraded?.Invoke(powerupType, newLevel);
+    }
 
     public void OnRuneActivated(int index)
     {
@@ -104,23 +131,28 @@ public class GameManager : MonoBehaviour
 
     public Coroutine PlaySequencePreview(float startDelay = 1, bool resetPlayIndex = true)
     {
+        isRuneChoosingTime = false;
         if (resetPlayIndex) currentPlayIndex = 0;
 
         return StartCoroutine(PlaySequencePreviewCoroutine(startDelay));
     }
 
-    private IEnumerator FailedSequence()
+    private IEnumerator FailedSequence(bool choseWrongRune = true)
     {
+        isRuneChoosingTime = false;
         SetPlayerInteractivity(false);
 
-        announcer.ShowWrongRuneText();
+        if (choseWrongRune)
+            announcer.ShowWrongRuneText();
+        else
+            announcer.ShowTimeoutText();
 
         yield return new WaitForSeconds(2);
 
-        if (currentRound > highScore)
+        if (currentRound > HighScore)
         {
-            highScore = currentRound;
-            announcer.ShowHighScoreText(highScore);
+            HighScore = currentRound;
+            announcer.ShowHighScoreText(HighScore);
 
             yield return new WaitForSeconds(3);
         }
@@ -133,8 +165,9 @@ public class GameManager : MonoBehaviour
 
     private void CorrectRuneSelected()
     {
+        remainingRuneChooseTime = maxTimeToChooseRune;
         runeActivated?.Invoke();
-        coinsAmount += coinsPerRune;
+        CoinsAmount += coinsPerRune;
         currentPlayIndex++;
 
         if (currentPlayIndex >= currentRuneSequence.Count)
@@ -145,7 +178,7 @@ public class GameManager : MonoBehaviour
 
     private void CompletedSequence()
     {
-        coinsAmount += coinsPerRound;
+        CoinsAmount += coinsPerRound;
         currentRound++;
 
         if (currentRound % increaseBoardSizeEveryXSequences == 0)
@@ -156,7 +189,6 @@ public class GameManager : MonoBehaviour
         currentRuneSequence.Add(Random.Range(0, BoardRunes.Count));
 
         Save();
-        
         PlaySequencePreview();
     }
 
@@ -164,9 +196,6 @@ public class GameManager : MonoBehaviour
     {
         SetPlayerInteractivity(false);
         announcer.Clear();
-
-        announcer.gameObject.SetActive(false);
-        announcer.gameObject.SetActive(true);
 
         yield return new WaitForSeconds(1);
 
@@ -182,6 +211,9 @@ public class GameManager : MonoBehaviour
 
         DisablePreviewFeedback();
         SetPlayerInteractivity(true);
+
+        isRuneChoosingTime = true;
+        remainingRuneChooseTime = maxTimeToChooseRune;
     }
 
     public void SetPlayerInteractivity(bool interactable)
@@ -190,7 +222,7 @@ public class GameManager : MonoBehaviour
             rune.Interactable = interactable;
 
         foreach (var powerup in powerups)
-            powerup.Interactable = interactable;
+            powerup.SetButtonInteractable(interactable);
     }
 
     private void EnablePreviewFeedback()
@@ -207,6 +239,18 @@ public class GameManager : MonoBehaviour
             spinlight.SetActive(false);
 
         announcer.ShowSequenceInputText();
+    }
+
+    private void Update()
+    {
+        if (!isRuneChoosingTime) return;
+
+        remainingRuneChooseTime -= Time.deltaTime;
+        remainingRuneChooseTime = Mathf.Max(0, remainingRuneChooseTime);
+        timeText.text = remainingRuneChooseTime.ToString("F1");
+
+        if (Mathf.Approximately(remainingRuneChooseTime, 0))
+            StartCoroutine(FailedSequence(false));
     }
 
     private void Awake()
@@ -267,7 +311,8 @@ public class GameManager : MonoBehaviour
     private void InitializeUI()
     {
         highScoreText.text = saveData.highScore.ToString();
-        coinsAmountText.text = coinsAmount.ToString();
+        coinsAmountText.text = CoinsAmount.ToString();
+        timeText.text = maxTimeToChooseRune.ToString("F1");
     }
 
     private void LoadSaveData()
@@ -275,17 +320,17 @@ public class GameManager : MonoBehaviour
         if (PlayerPrefs.HasKey(saveKey))
         {
             string serializedSaveData = PlayerPrefs.GetString(saveKey);
-            saveData = JsonUtility.FromJson<SaveData>(serializedSaveData);
+            saveData = SaveData.Deserialize(serializedSaveData);
 
             return;
         }
 
-        saveData = new SaveData();
+        saveData = new SaveData(true);
     }
 
     private void Save()
     {
-        string serializedSaveData = JsonUtility.ToJson(saveData);
+        string serializedSaveData = saveData.Serialize();
         PlayerPrefs.SetString(saveKey, serializedSaveData);
     }
 }

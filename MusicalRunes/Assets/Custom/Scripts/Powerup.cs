@@ -1,26 +1,30 @@
-using System.Collections;
-using System.Collections.Generic;
+using MusicalRunes;
 using UnityEngine;
 using UnityEngine.UI;
 
 public abstract class Powerup : MonoBehaviour
 {
-    [SerializeField] private int cooldownDuration = 3;
-    [SerializeField] private bool decreaseCooldownOnRuneActivation;
-
     [SerializeField] private Button powerupButton;
     [SerializeField] private RectTransform cooldownBar;
+    [SerializeField] protected PowerupConfig powerupConfig;
 
     private float cooldownBarHeight;
     private int currentCooldown;
+    protected int currentLevel;
 
-    public bool Interactable
+    private int cooldownDuration => powerupConfig.GetCooldown(currentLevel);
+
+    public void SetButtonInteractable(bool interactable)
     {
-        get => powerupButton.interactable;
-        set => powerupButton.interactable = IsAvailable && value;
+        powerupButton.interactable = IsAvailable && interactable;
     }
 
-    protected virtual bool IsAvailable => currentCooldown <= 0;
+    private void ResetButtonInteractable()
+    {
+        SetButtonInteractable(true);
+    }
+
+    protected virtual bool IsAvailable => currentLevel > 0 && currentCooldown <= 0;
 
     public virtual void Start()
     {
@@ -30,17 +34,32 @@ public abstract class Powerup : MonoBehaviour
         SetCooldownBarHeight();
 
         powerupButton.onClick.AddListener(OnClick);
-        GameManager.Instance.sequenceCompleted += OnSequenceCompleted;
-        GameManager.Instance.runeActivated += OnRuneActivated;
+
+        var gameManager = GameManager.Instance;
+        currentLevel = gameManager.GetPowerupLevel(powerupConfig.powerupType);
+
+        gameManager.sequenceCompleted += OnSequenceCompleted;
+        gameManager.runeActivated += OnRuneActivated;
+        gameManager.powerupUpgraded += OnPowerupUpgraded;
+
+        ResetButtonInteractable();
     }
 
     protected abstract void PerformPowerupEffect();
+
+    private void OnPowerupUpgraded(PowerupType upgradedPowerup, int newLevel)
+    {
+        if (upgradedPowerup != powerupConfig.powerupType) return;
+
+        currentLevel = newLevel;
+        ResetButtonInteractable();
+    }
 
     private void OnClick()
     {
         Debug.Assert(IsAvailable, "Trying to activate a unavailable powerup", gameObject);
         ResetCooldown();
-        Interactable = false;
+        SetButtonInteractable(false);
 
         PerformPowerupEffect();
     }
@@ -53,14 +72,14 @@ public abstract class Powerup : MonoBehaviour
 
     protected virtual void OnSequenceCompleted()
     {
-        if (decreaseCooldownOnRuneActivation) return;
+        if (powerupConfig.decreaseCooldownOnRuneActivation) return;
 
         DecreaseCooldown();
     }
 
     protected virtual void OnRuneActivated()
     {
-        if (!decreaseCooldownOnRuneActivation) return;
+        if (!powerupConfig.decreaseCooldownOnRuneActivation) return;
 
         DecreaseCooldown();
     }
@@ -74,7 +93,7 @@ public abstract class Powerup : MonoBehaviour
 
         SetCooldownBarHeight();
 
-        Interactable = IsAvailable;
+        ResetButtonInteractable();
     }
 
     private void SetCooldownBarHeight()
@@ -85,7 +104,9 @@ public abstract class Powerup : MonoBehaviour
 
     private void OnDestroy()
     {
-        GameManager.Instance.sequenceCompleted -= OnSequenceCompleted;
-        GameManager.Instance.runeActivated -= OnRuneActivated;
+        var gameManager = GameManager.Instance;
+        gameManager.sequenceCompleted -= OnSequenceCompleted;
+        gameManager.runeActivated -= OnRuneActivated;
+        gameManager.powerupUpgraded -= OnPowerupUpgraded;
     }
 }

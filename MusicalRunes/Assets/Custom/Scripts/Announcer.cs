@@ -7,6 +7,7 @@ public class Announcer : MonoBehaviour
     [SerializeField] private string previewText = "Hey, Listen!";
     [SerializeField] private string sequenceInputText = "Show me what you got!";
     [SerializeField] private string wrongRuneText = "Oh no!!!";
+    [SerializeField] private string timeoutText = "Timeout!";
     [SerializeField] private string highScoreText = "New High Score: {0}";
 
     [SerializeField] private float bounceAmplitude = 0.01f;
@@ -32,6 +33,11 @@ public class Announcer : MonoBehaviour
     public void ShowWrongRuneText()
     {
         announcerText.text = wrongRuneText;
+    }
+
+    public void ShowTimeoutText()
+    {
+        announcerText.text = timeoutText;
     }
 
     public void ShowHighScoreText(int highScore)
