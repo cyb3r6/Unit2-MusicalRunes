@@ -148,6 +148,7 @@ public class GameManager : MonoBehaviour
         coinsAmount += coinsPerRound;
         currentRound++;
 
+        // CHALLENGE
         if (currentRound % increaseBoardSizeEveryXSequences == 0)
             AddRandomRuneToBoard();
 

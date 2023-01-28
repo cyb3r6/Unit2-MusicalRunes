@@ -124,7 +124,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 0}
+      - m_Target: {fileID: 145368744081177485}
         m_TargetAssemblyTypeName: Rune, Assembly-CSharp
         m_MethodName: OnClick
         m_Mode: 1
@@ -167,11 +167,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 92aa35bf4bae291418a4d4bfcf89a610, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  activationColor: {r: 0, g: 0, b: 0, a: 0}
+  activationColor: {r: 1, g: 0, b: 0, a: 1}
   audioSource: {fileID: 1508862027921346289}
   button: {fileID: 5194025989607932901}
   runeImage: {fileID: 251575855419921958}
-  activationTransitionDuration: 0.3
+  colorTransitionDuration: 0.35
   minActivationDuration: 0.5
 --- !u!1 &3482551313019070963
 GameObject:
