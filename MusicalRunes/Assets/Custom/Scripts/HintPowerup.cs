@@ -1,14 +1,16 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using UnityEngine;
+using MusicalRunes;
+using Random = UnityEngine.Random;
 
 public class HintPowerup : Powerup
 {
-    [SerializeField] private int runeHintAmount;
-
     private List<int> selectedRuneIndexes;
     private bool isActive;
+
+    private int RuneHintAmount => ((HintPowerupConfig)powerupConfig).GetHintAmount(currentLevel);
 
     protected override void PerformPowerupEffect()
     {
@@ -19,8 +21,10 @@ public class HintPowerup : Powerup
 
         selectedRuneIndexes = Enumerable.Range(0, manager.BoardRunes.Count)
             .OrderBy(index => index == manager.CurrentRuneIndex ? 2 : Random.value)
-            .Take(runeHintAmount)
             .ToList();
+
+        selectedRuneIndexes.RemoveAt(selectedRuneIndexes.Count - 1);
+        selectedRuneIndexes = selectedRuneIndexes.GetRange(0, Math.Min(RuneHintAmount, selectedRuneIndexes.Count));
 
         StartCoroutine(AnimateHintPowerUp());
     }
