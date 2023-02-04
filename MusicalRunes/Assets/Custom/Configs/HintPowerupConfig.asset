@@ -1,0 +1,21 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c7298dbe984c39b4095e4b1ea70cbcbf, type: 3}
+  m_Name: HintPowerupConfig
+  m_EditorClassIdentifier: 
+  powerupType: 0
+  powerupNameId: HintName
+  descriptionId: HintDescription
+  pricePerLevel: 050000000f00000014000000
+  cooldownAtLevel: 050000000400000003000000
+  decreaseCooldownOnRuneActivation: 1
+  hintsPerLevel: 020000000300000004000000

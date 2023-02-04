@@ -28,7 +28,7 @@ RectTransform:
   m_GameObject: {fileID: 2276659960320714882}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 33.166}
-  m_LocalScale: {x: 0.0030000003, y: 0.0030000003, z: 0.0030000003}
+  m_LocalScale: {x: 0.0009847501, y: 0.0009847501, z: 0.0009847501}
   m_ConstrainProportionsScale: 1
   m_Children:
   - {fileID: 4043893917218889906}
@@ -141,8 +141,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 0.00390625, y: -137.5}
-  m_SizeDelta: {x: -4393.8, y: 274.7}
+  m_AnchoredPosition: {x: 0, y: -160}
+  m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &2276659960529742873
 CanvasRenderer:
@@ -286,10 +286,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7370eedc39906814d94665db62347d1b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  previewText: Hey, Listen!
-  sequenceInputText: Show me what you got!
-  wrongRuneText: Oh no!!!
-  highScoreText: 'New High Score: {0}'
+  previewTextId: AnnouncerListen
+  sequenceInputTextId: AnnouncerPlayerTurn
+  wrongRuneTextId: AnnouncerFailedChoice
+  timeoutTextId: AnnouncerTimeout
+  highScoreTextId: AnnouncerHighScore
+  failedByTimeoutTextId: AnnouncerFailedByTimeout
+  failedByRuneChoiceTextId: AnnouncerFailedByRuneChoice
+  bloodSacrificeTextId: AnnouncerBloodSacrifice
   bounceAmplitude: 0.01
   bounceFrequency: 5
   announcerText: {fileID: 2276659960529742872}

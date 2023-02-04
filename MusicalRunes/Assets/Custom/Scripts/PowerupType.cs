@@ -5,5 +5,6 @@ namespace MusicalRunes
         Hint,
         Replay,
         Purge,
+        BloodSacrifice
     }
 }

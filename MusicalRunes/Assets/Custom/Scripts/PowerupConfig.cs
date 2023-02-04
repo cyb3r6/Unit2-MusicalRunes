@@ -7,12 +7,15 @@ namespace MusicalRunes
     public class PowerupConfig : ScriptableObject
     {
         public PowerupType powerupType;
-        public string powerupName;
-        [TextArea] public string description;
+        public string powerupNameId;
+        public string descriptionId;
 
         public int[] pricePerLevel = { 50, 100, 200 };
         public int[] cooldownAtLevel = { 5, 4, 3 };
         public bool decreaseCooldownOnRuneActivation;
+
+        public string PowerupName => Localization.GetLocalizedText(powerupNameId);
+        public string Description => Localization.GetLocalizedText(descriptionId);
 
         public int MaxLevel => pricePerLevel.Length;
 
