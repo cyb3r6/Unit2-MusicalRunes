@@ -57,6 +57,7 @@ public abstract class Powerup : MonoBehaviour
 
     private void OnClick()
     {
+        Debug.Log("Powerup Button Clicked");
         Debug.Assert(IsAvailable, "Trying to activate a unavailable powerup", gameObject);
         ResetCooldown();
         SetButtonInteractable(false);

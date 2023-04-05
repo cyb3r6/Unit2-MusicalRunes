@@ -2106,12 +2106,12 @@ PrefabInstance:
     - target: {fileID: 2319702556752590969, guid: dc6af3fe7c876ac4a8565335de299049,
         type: 3}
       propertyPath: m_AnchorMax.y
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 2319702556752590969, guid: dc6af3fe7c876ac4a8565335de299049,
         type: 3}
       propertyPath: m_AnchorMin.y
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 2319702556752590969, guid: dc6af3fe7c876ac4a8565335de299049,
         type: 3}
@@ -2126,7 +2126,12 @@ PrefabInstance:
     - target: {fileID: 2319702556752590969, guid: dc6af3fe7c876ac4a8565335de299049,
         type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: 0
+      value: -27.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 2319702556752590971, guid: dc6af3fe7c876ac4a8565335de299049,
+        type: 3}
+      propertyPath: m_fontSize
+      value: 35
       objectReference: {fileID: 0}
     - target: {fileID: 2319702557145827640, guid: dc6af3fe7c876ac4a8565335de299049,
         type: 3}
@@ -2652,6 +2657,22 @@ GameObject:
     type: 3}
   m_PrefabInstance: {fileID: 3795204831107020839}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &1172697247
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3565705873565662049}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ad5a86a3f6c30aa4db56858b0f76c927, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  powerupButton: {fileID: 3565705873565662054}
+  cooldownBar: {fileID: 3565705874068768056}
+  powerupConfig: {fileID: 11400000, guid: 355717e18aacb544cacace124a874549, type: 2}
+  runeHintAmount: 0
 --- !u!114 &750320214053739177
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2671,22 +2692,6 @@ MonoBehaviour:
   savedColor: {r: 1, g: 1, b: 1, a: 1}
   savedTextUV0: {x: 0, y: 0, z: 0, w: 0}
   savedFill: 1
---- !u!114 &1172697247
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3565705873565662049}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ad5a86a3f6c30aa4db56858b0f76c927, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  powerupButton: {fileID: 3565705873565662054}
-  cooldownBar: {fileID: 3565705874068768056}
-  powerupConfig: {fileID: 11400000, guid: 355717e18aacb544cacace124a874549, type: 2}
-  runeHintAmount: 0
 --- !u!114 &3565705873565662054 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 419019715237462849, guid: 1720f197c488f2244bae0575ea2322ad,
@@ -2792,6 +2797,22 @@ GameObject:
     type: 3}
   m_PrefabInstance: {fileID: 3795204831107020839}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &1457296569
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7025681083374639122}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0f4137396f9f07a458f285421252a0f7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  powerupButton: {fileID: 7025681083374639125}
+  cooldownBar: {fileID: 7025681084207084908}
+  powerupConfig: {fileID: 11400000, guid: 7cdf69040e97ca647b2a246264e0ab75, type: 2}
+  minBoardSize: 2
 --- !u!114 &7024683324742033167
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2811,22 +2832,6 @@ MonoBehaviour:
   savedColor: {r: 1, g: 1, b: 1, a: 1}
   savedTextUV0: {x: 0, y: 0, z: 0, w: 0}
   savedFill: 1
---- !u!114 &1457296569
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7025681083374639122}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 0f4137396f9f07a458f285421252a0f7, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  powerupButton: {fileID: 7025681083374639125}
-  cooldownBar: {fileID: 7025681084207084908}
-  powerupConfig: {fileID: 11400000, guid: 7cdf69040e97ca647b2a246264e0ab75, type: 2}
-  minBoardSize: 2
 --- !u!114 &7025681083374639125 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 6137136455501275186, guid: 1720f197c488f2244bae0575ea2322ad,
@@ -2888,6 +2893,21 @@ GameObject:
     type: 3}
   m_PrefabInstance: {fileID: 3795204831107020839}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &1881255459
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8658310839153400004}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c247e9690b1b59a4a9ed836319ae98f0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  powerupButton: {fileID: 8658310839153400003}
+  cooldownBar: {fileID: 8658310840388498874}
+  powerupConfig: {fileID: 11400000, guid: ac8c0c3ff8d9fad4a8cc7454f5917499, type: 2}
 --- !u!114 &8660082632867249756
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2907,21 +2927,6 @@ MonoBehaviour:
   savedColor: {r: 1, g: 1, b: 1, a: 1}
   savedTextUV0: {x: 0, y: 0, z: 0, w: 0}
   savedFill: 1
---- !u!114 &1881255459
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8658310839153400004}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c247e9690b1b59a4a9ed836319ae98f0, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  powerupButton: {fileID: 8658310839153400003}
-  cooldownBar: {fileID: 8658310840388498874}
-  powerupConfig: {fileID: 11400000, guid: ac8c0c3ff8d9fad4a8cc7454f5917499, type: 2}
 --- !u!1 &8658310839409624442 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 5513313565753621853, guid: 1720f197c488f2244bae0575ea2322ad,
@@ -3052,6 +3057,24 @@ GameObject:
     type: 3}
   m_PrefabInstance: {fileID: 3795204831107020839}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &1442633167
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9203584939765368239}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 07a244c78bea1fb459c40f74c3a3b84a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  powerupButton: {fileID: 9203584939765368232}
+  cooldownBar: {fileID: 9203584938849052881}
+  powerupConfig: {fileID: 11400000, guid: b98788a7bfc7a154a8b98ad39d9e0199, type: 2}
+  animationDuration: 4
+  perRuneAnimationDelay: 0.15
+  announcer: {fileID: 0}
 --- !u!114 &3507194365550052184
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3071,21 +3094,3 @@ MonoBehaviour:
   savedColor: {r: 1, g: 1, b: 1, a: 1}
   savedTextUV0: {x: 0, y: 0, z: 0, w: 0}
   savedFill: 1
---- !u!114 &1442633167
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 9203584939765368239}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 07a244c78bea1fb459c40f74c3a3b84a, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  powerupButton: {fileID: 9203584939765368232}
-  cooldownBar: {fileID: 9203584938849052881}
-  powerupConfig: {fileID: 11400000, guid: b98788a7bfc7a154a8b98ad39d9e0199, type: 2}
-  animationDuration: 4
-  perRuneAnimationDelay: 0.15
-  announcer: {fileID: 0}
